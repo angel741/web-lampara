@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Control lámpara RGB</title>
+  <style>
+    :root {
+      --bg: #0f1218;
+      --surface: #1a1f2a;
+      --border: #2a3344;
+      --text: #e8ecf4;
+      --muted: #8b95a8;
+      --accent: #5b8cff;
+      --on: #3dd68c;
+      --off: #ff6b6b;
+      --radius: 12px;
+      --font: "Segoe UI", system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font);
+      background: radial-gradient(ellipse 120% 80% at 50% -20%, #1e2840 0%, var(--bg) 55%);
+      color: var(--text);
+      padding: clamp(16px, 4vw, 32px);
+    }
+
+    .wrap {
+      max-width: 440px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.875rem;
+      margin-bottom: 20px;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+
+    .panel-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin: 0 0 12px;
+    }
+
+    .row-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    button {
+      font-family: inherit;
+      font-size: 0.95rem;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: transform 0.12s ease, filter 0.12s ease;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .btn-power {
+      flex: 1;
+      min-width: 120px;
+      font-weight: 600;
+    }
+
+    .btn-power.on {
+      background: linear-gradient(145deg, #2a8f5a, var(--on));
+      color: #fff;
+    }
+
+    .btn-power.off {
+      background: linear-gradient(145deg, #8f3a3a, var(--off));
+      color: #fff;
+    }
+
+    .btn-effect {
+      width: 48px;
+      height: 48px;
+      padding: 0;
+      font-size: 1.35rem;
+      line-height: 1;
+      background: var(--border);
+      color: var(--text);
+    }
+
+    .btn-effect:hover {
+      filter: brightness(1.15);
+    }
+
+    .btn-ghost {
+      background: var(--border);
+      color: var(--text);
+      font-size: 0.85rem;
+      padding: 10px 14px;
+    }
+
+    .btn-ghost.active {
+      background: #2a4a7a;
+      color: #fff;
+    }
+
+    .effect-label {
+      width: 100%;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 10px;
+    }
+
+    label.select-wrap {
+      display: block;
+      width: 100%;
+      margin-top: 12px;
+    }
+
+    .select-head {
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+      color: var(--muted);
+    }
+
+    select {
+      width: 100%;
+      font-family: inherit;
+      font-size: 0.95rem;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #12161e;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .slider-block {
+      margin-bottom: 16px;
+    }
+
+    .slider-block:last-child {
+      margin-bottom: 0;
+    }
+
+    .slider-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 6px;
+    }
+
+    .slider-head label {
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .slider-head .value {
+      font-variant-numeric: tabular-nums;
+      color: var(--accent);
+      font-size: 0.9rem;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 8px;
+      border-radius: 4px;
+      appearance: none;
+      background: var(--border);
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(91, 140, 255, 0.4);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: none;
+    }
+
+    .preview {
+      height: 52px;
+      border-radius: 10px;
+      margin-top: 14px;
+      border: 1px solid var(--border);
+      box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.35);
+    }
+
+    .auto-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .auto-row .btn-ghost {
+      flex: 1;
+      min-width: 140px;
+    }
+
+    #ipPanel {
+      display: none;
+      margin-top: 10px;
+    }
+
+    #ipPanel.visible {
+      display: block;
+    }
+
+    #ipPanel input[type="text"] {
+      width: 100%;
+      font-family: ui-monospace, monospace;
+      font-size: 0.85rem;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #12161e;
+      color: var(--text);
+    }
+
+    .hint {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (min-width: 400px) {
+      .metrics {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .metric {
+      background: #12161e;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      min-height: 72px;
+    }
+
+    .metric.full {
+      grid-column: 1 / -1;
+    }
+
+    .metric-k {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .metric-v {
+      font-size: 1.05rem;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      word-break: break-word;
+    }
+
+    .palette-swatch {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .palette-swatch span {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .status {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 10px;
+      word-break: break-all;
+    }
+
+    .status.ok {
+      color: var(--on);
+    }
+
+    .status.err {
+      color: var(--off);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Lámpara RGB</h1>
+    <p class="subtitle">Control local vía ESP32-S3</p>
+
+    <div class="panel">
+      <p class="panel-title">Conexión</p>
+      <button type="button" class="btn-ghost" id="btnToggleIp" aria-expanded="false">
+        Mostrar configuración de IP
+      </button>
+      <div id="ipPanel">
+        <label class="select-wrap" for="baseUrl">
+          <div class="select-head">URL base del dispositivo (sin barra final)</div>
+          <input type="text" id="baseUrl" spellcheck="false" autocomplete="off" placeholder="http://192.168.18.139/" inputmode="url" />
+        </label>
+        <p class="hint">
+          Por defecto: la IP de tu red. El firmware de ejemplo expone <code>GET/POST /api/state</code>.
+        </p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <p class="panel-title">Encendido y efectos</p>
+      <div class="row-actions">
+        <button type="button" class="btn-power off" id="btnPower" aria-pressed="false">Apagado</button>
+        <button type="button" class="btn-effect" id="btnEffectMore" title="Siguiente efecto">+</button>
+        <button type="button" class="btn-effect" id="btnEffectLess" title="Efecto anterior">−</button>
+      </div>
+      <div class="effect-label">Efecto <span id="effectName">—</span></div>
+      <label class="select-wrap" for="effectSelect">
+        <div class="select-head">Seleccionar efecto</div>
+        <select id="effectSelect">
+          <option value="1">1 LamparaRGB</option>
+          <option value="2">2 Lampara</option>
+          <option value="3">3 Circulos</option>
+          <option value="4">4 Flow</option>
+          <option value="5">5 BT</option>
+          <option value="6">6 Ruido</option>
+          <option value="7">7 Botes</option> 
+        </select>
+      </label>
+    </div>
+
+    <div class="panel">
+      <p class="panel-title">Color y parámetros</p>
+      <div class="slider-block">
+        <div class="slider-head">
+          <label for="brightness">Brillo</label>
+          <span class="value" id="valBrightness">50</span>
+        </div>
+        <input type="range" id="brightness" min="0" max="100" value="50" />
+      </div>
+      <div class="slider-block">
+        <div class="slider-head">
+          <label for="red">Rojo (R)</label>
+          <span class="value" id="valR">128</span>
+        </div>
+        <input type="range" id="red" min="0" max="255" value="128" />
+      </div>
+      <div class="slider-block">
+        <div class="slider-head">
+          <label for="green">Verde (G)</label>
+          <span class="value" id="valG">128</span>
+        </div>
+        <input type="range" id="green" min="0" max="255" value="128" />
+      </div>
+      <div class="slider-block">
+        <div class="slider-head">
+          <label for="blue">Azul (B)</label>
+          <span class="value" id="valB">128</span>
+        </div>
+        <input type="range" id="blue" min="0" max="255" value="128" />
+      </div>
+      <div class="slider-block">
+        <div class="slider-head">
+          <label for="ritmo">Ritmo</label>
+          <span class="value" id="valRitmo">50</span>
+        </div>
+        <input type="range" id="ritmo" min="1" max="100" value="50" />
+      </div>
+      <div class="slider-block">
+        <div class="slider-head">
+          <label for="nivel">Nivel</label>
+          <span class="value" id="valNivel">50</span>
+        </div>
+        <input type="range" id="nivel" min="1" max="100" value="50" />
+      </div>
+      <div class="preview" id="preview" aria-hidden="true"></div>
+    </div>
+
+    <div class="panel">
+      <p class="panel-title">Efecto automático</p>
+      <div class="auto-row">
+        <button type="button" class="btn-ghost" id="btnAuto">Automático: no</button>
+      </div>
+      <div class="slider-block">
+        <div class="slider-head">
+          <label for="autoInterval">Tiempo entre cambios (s)</label>
+          <span class="value" id="valAutoInterval">10</span>
+        </div>
+        <input type="range" id="autoInterval" min="3" max="30" value="10" />
+      </div>
+    </div>
+
+    <div class="panel">
+      <p class="panel-title">Sensores y estado</p>
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-k">Temperatura</div>
+          <div class="metric-v" id="mTemp">—</div>
+        </div>
+        <div class="metric">
+          <div class="metric-k">Humedad</div>
+          <div class="metric-v" id="mHum">—</div>
+        </div>
+        <div class="metric">
+          <div class="metric-k">Presión</div>
+          <div class="metric-v" id="mPres">—</div>
+        </div>
+        <div class="metric">
+          <div class="metric-k">Consumo</div>
+          <div class="metric-v" id="mConsumo">—</div>
+        </div>
+        <div class="metric">
+          <div class="metric-k">Voltaje</div>
+          <div class="metric-v" id="mVolt">—</div>
+        </div>
+        <div class="metric full">
+          <div class="metric-k">Tiempo encendido</div>
+          <div class="metric-v" id="mOn">—</div>
+        </div>
+        <div class="metric full">
+          <div class="metric-k">Paleta de color</div>
+          <div class="metric-v" id="mPaletteText">—</div>
+          <div class="palette-swatch" id="mPaletteSwatches" aria-hidden="true"></div>
+        </div>
+        <div class="metric full">
+          <div class="metric-k">Temperatura de color</div>
+          <div class="metric-v" id="mCct">—</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="status" id="status"></p>
+  </div>
+
+  <script>
+    (function () {
+      const EFFECT_NAMES = {
+        1: "LamparaRGB",
+        2: "Lampara",
+        3: "Circulos",
+        4: "Flow",
+        5: "BT",
+        6: "Ruido",         
+        7: "Botes",
+      };
+
+      const STORAGE_URL = "rgbLampBaseUrl";
+      /** URL por defecto (barra final opcional; se normaliza al llamar a la API). */
+      const DEFAULT_BASE = "http://192.168.18.139/";
+
+      const el = {
+        btnPower: document.getElementById("btnPower"),
+        btnEffectLess: document.getElementById("btnEffectLess"),
+        btnEffectMore: document.getElementById("btnEffectMore"),
+        effectSelect: document.getElementById("effectSelect"),
+        effectName: document.getElementById("effectName"),
+        brightness: document.getElementById("brightness"),
+        red: document.getElementById("red"),
+        green: document.getElementById("green"),
+        blue: document.getElementById("blue"),
+        ritmo: document.getElementById("ritmo"),
+        nivel: document.getElementById("nivel"),
+        valBrightness: document.getElementById("valBrightness"),
+        valR: document.getElementById("valR"),
+        valG: document.getElementById("valG"),
+        valB: document.getElementById("valB"),
+        valRitmo: document.getElementById("valRitmo"),
+        valNivel: document.getElementById("valNivel"),
+        btnAuto: document.getElementById("btnAuto"),
+        autoInterval: document.getElementById("autoInterval"),
+        valAutoInterval: document.getElementById("valAutoInterval"),
+        btnToggleIp: document.getElementById("btnToggleIp"),
+        ipPanel: document.getElementById("ipPanel"),
+        baseUrl: document.getElementById("baseUrl"),
+        preview: document.getElementById("preview"),
+        status: document.getElementById("status"),
+        mTemp: document.getElementById("mTemp"),
+        mHum: document.getElementById("mHum"),
+        mPres: document.getElementById("mPres"),
+        mConsumo: document.getElementById("mConsumo"),
+        mVolt: document.getElementById("mVolt"),
+        mOn: document.getElementById("mOn"),
+        mPaletteText: document.getElementById("mPaletteText"),
+        mPaletteSwatches: document.getElementById("mPaletteSwatches"),
+        mCct: document.getElementById("mCct"),
+      };
+
+      const state = {
+        on: false,
+        effect: 1,
+        brightness: 50,
+        r: 128,
+        g: 128,
+        b: 128,
+        ritmo: 50,
+        nivel: 50,
+        autoEffect: false,
+        autoInterval: 10,
+      };
+
+      let pollTimer = null;
+      let applyingRemote = false;
+
+      function normalizeBase(raw) {
+        let s = (raw || "").trim();
+        if (!s) return "";
+        s = s.replace(/\/+$/, "");
+        return s;
+      }
+
+      function getBase() {
+        return normalizeBase(el.baseUrl.value);
+      }
+
+      function saveBase() {
+        try {
+          localStorage.setItem(STORAGE_URL, getBase() || DEFAULT_BASE);
+        } catch (_) {}
+      }
+
+      function loadBase() {
+        let u = DEFAULT_BASE;
+        try {
+          const saved = localStorage.getItem(STORAGE_URL);
+          if (saved) u = saved;
+        } catch (_) {}
+        el.baseUrl.value = u;
+      }
+
+      function getStatePayload() {
+        return {
+          on: state.on,
+          effect: state.effect,
+          brightness: state.brightness,
+          r: state.r,
+          g: state.g,
+          b: state.b,
+          ritmo: state.ritmo,
+          nivel: state.nivel,
+          autoEffect: state.autoEffect,
+          autoInterval: state.autoInterval,
+        };
+      }
+
+      function applyFromServer(data) {
+        if (!data || typeof data !== "object") return;
+        applyingRemote = true;
+        try {
+          if (typeof data.on === "boolean") state.on = data.on;
+          if (typeof data.effect === "number" && data.effect >= 1 && data.effect <= 6) {
+            state.effect = data.effect;
+          }
+          if (typeof data.brightness === "number") state.brightness = clamp(data.brightness, 0, 100);
+          if (typeof data.r === "number") state.r = clamp(data.r, 0, 255);
+          if (typeof data.g === "number") state.g = clamp(data.g, 0, 255);
+          if (typeof data.b === "number") state.b = clamp(data.b, 0, 255);
+          if (typeof data.ritmo === "number") state.ritmo = clamp(data.ritmo, 1, 100);
+          if (typeof data.nivel === "number") state.nivel = clamp(data.nivel, 1, 100);
+          if (typeof data.autoEffect === "boolean") state.autoEffect = data.autoEffect;
+          if (typeof data.autoInterval === "number") {
+            state.autoInterval = clamp(Math.round(data.autoInterval), 3, 30);
+          }
+          syncControlsFromState();
+          updateMetrics(data);
+        } finally {
+          applyingRemote = false;
+        }
+      }
+
+      function clamp(n, a, b) {
+        return Math.max(a, Math.min(b, n));
+      }
+
+      function syncControlsFromState() {
+        el.btnPower.textContent = state.on ? "Encendido" : "Apagado";
+        el.btnPower.classList.toggle("on", state.on);
+        el.btnPower.classList.toggle("off", !state.on);
+        el.btnPower.setAttribute("aria-pressed", state.on ? "true" : "false");
+        el.effectSelect.value = String(state.effect);
+        el.effectName.textContent = state.effect + " " + (EFFECT_NAMES[state.effect] || "");
+        el.brightness.value = String(state.brightness);
+        el.red.value = String(state.r);
+        el.green.value = String(state.g);
+        el.blue.value = String(state.b);
+        el.ritmo.value = String(state.ritmo);
+        el.nivel.value = String(state.nivel);
+        el.autoInterval.value = String(state.autoInterval);
+        el.btnAuto.textContent = state.autoEffect ? "Automático: sí" : "Automático: no";
+        el.btnAuto.classList.toggle("active", state.autoEffect);
+        updateValueLabels();
+        updatePreview();
+      }
+
+      function updateValueLabels() {
+        el.valBrightness.textContent = String(state.brightness);
+        el.valR.textContent = String(state.r);
+        el.valG.textContent = String(state.g);
+        el.valB.textContent = String(state.b);
+        el.valRitmo.textContent = String(state.ritmo);
+        el.valNivel.textContent = String(state.nivel);
+        el.valAutoInterval.textContent = String(state.autoInterval);
+      }
+
+      function updatePreview() {
+        const f = state.brightness / 100;
+        const r = Math.round(state.r * f);
+        const g = Math.round(state.g * f);
+        const b = Math.round(state.b * f);
+        el.preview.style.background = state.on ? `rgb(${r}, ${g}, ${b})` : "#1a1f2a";
+      }
+
+      function updateMetrics(data) {
+        function setText(idEl, val, fallback) {
+          if (val === undefined || val === null) {
+            idEl.textContent = fallback !== undefined ? fallback : "—";
+            return;
+          }
+          idEl.textContent = String(val);
+        }
+
+        setText(el.mTemp, data.temperature);
+        setText(el.mHum, data.humidity);
+        setText(el.mPres, data.pressure);
+        var cons =
+          data.consumption != null
+            ? data.consumption
+            : data.power != null
+              ? data.power
+              : data.currentMa != null
+                ? String(data.currentMa) + " mA"
+                : null;
+        if (cons == null && data.consumptionVoltage != null) cons = data.consumptionVoltage;
+        setText(el.mConsumo, cons);
+        var volts = data.voltage != null ? data.voltage : data.volts;
+        setText(el.mVolt, volts);
+        setText(el.mOn, data.timeOn != null ? data.timeOn : data.uptime);
+
+        const pal = data.colorPalette;
+        if (Array.isArray(pal) && pal.length) {
+          el.mPaletteText.textContent = pal.map((c) => (typeof c === "string" ? c : JSON.stringify(c))).join(", ");
+          el.mPaletteSwatches.innerHTML = "";
+          pal.slice(0, 12).forEach(function (c) {
+            const span = document.createElement("span");
+            if (typeof c === "string") {
+              span.style.background = c;
+            } else if (c && typeof c.r === "number") {
+              span.style.background = "rgb(" + c.r + "," + c.g + "," + c.b + ")";
+            }
+            el.mPaletteSwatches.appendChild(span);
+          });
+        } else if (typeof pal === "string") {
+          el.mPaletteText.textContent = pal;
+          el.mPaletteSwatches.innerHTML = "";
+        } else if (data.paletteDescription) {
+          setText(el.mPaletteText, data.paletteDescription);
+          el.mPaletteSwatches.innerHTML = "";
+        } else {
+          el.mPaletteText.textContent = "—";
+          el.mPaletteSwatches.innerHTML = "";
+        }
+
+        setText(el.mCct, data.colorTemperature != null ? data.colorTemperature : data.cct);
+      }
+
+      let debounceTimer;
+      function notifyBackend() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(sendToDevice, 100);
+      }
+
+      async function sendToDevice() {
+        const base = getBase();
+        if (!base) {
+          el.status.textContent = "Indica una URL base.";
+          el.status.className = "status err";
+          return;
+        }
+        const url = base + "/api/state";
+        try {
+          const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(getStatePayload()),
+          });
+          if (!res.ok) throw new Error(res.status + " " + res.statusText);
+          const json = await res.json().catch(function () {
+            return null;
+          });
+          if (json) applyFromServer(json);
+          el.status.textContent = "Sincronizado.";
+          el.status.className = "status ok";
+        } catch (e) {
+          el.status.textContent = "Error: " + (e && e.message ? e.message : e);
+          el.status.className = "status err";
+        }
+      }
+
+      async function fetchState() {
+        const base = getBase();
+        if (!base) return;
+        const url = base + "/api/state";
+        try {
+          const res = await fetch(url, { method: "GET", cache: "no-store" });
+          if (!res.ok) throw new Error(res.statusText);
+          const json = await res.json();
+          applyFromServer(json);
+          el.status.textContent = "Conectado.";
+          el.status.className = "status ok";
+        } catch (e) {
+          el.status.textContent = "Sin datos: " + (e && e.message ? e.message : e);
+          el.status.className = "status err";
+        }
+      }
+
+      function startPoll() {
+        if (pollTimer) clearInterval(pollTimer);
+        pollTimer = setInterval(fetchState, 2500);
+      }
+
+      function stopPoll() {
+        if (pollTimer) {
+          clearInterval(pollTimer);
+          pollTimer = null;
+        }
+      }
+
+      el.btnPower.addEventListener("click", function () {
+        state.on = !state.on;
+        syncControlsFromState();
+        notifyBackend();
+      });
+
+      el.btnEffectLess.addEventListener("click", function () {
+        state.effect = state.effect <= 1 ? 6 : state.effect - 1;
+        syncControlsFromState();
+        notifyBackend();
+      });
+
+      el.btnEffectMore.addEventListener("click", function () {
+        state.effect = state.effect >= 6 ? 1 : state.effect + 1;
+        syncControlsFromState();
+        notifyBackend();
+      });
+
+      el.effectSelect.addEventListener("change", function () {
+        state.effect = parseInt(el.effectSelect.value, 10);
+        syncControlsFromState();
+        notifyBackend();
+      });
+
+      el.btnAuto.addEventListener("click", function () {
+        state.autoEffect = !state.autoEffect;
+        syncControlsFromState();
+        notifyBackend();
+      });
+
+      function bindSlider(rangeKey, stateKey, min, max) {
+        const input = el[rangeKey];
+        input.addEventListener("input", function () {
+          if (applyingRemote) return;
+          let v = parseInt(input.value, 10);
+          state[stateKey] = clamp(v, min, max);
+          updateValueLabels();
+          updatePreview();
+        });
+        input.addEventListener("change", function () {
+          notifyBackend();
+        });
+      }
+
+      bindSlider("brightness", "brightness", 0, 100);
+      bindSlider("red", "r", 0, 255);
+      bindSlider("green", "g", 0, 255);
+      bindSlider("blue", "b", 0, 255);
+      bindSlider("ritmo", "ritmo", 1, 100);
+      bindSlider("nivel", "nivel", 1, 100);
+      bindSlider("autoInterval", "autoInterval", 3, 30);
+
+      el.btnToggleIp.addEventListener("click", function () {
+        const open = el.ipPanel.classList.toggle("visible");
+        el.btnToggleIp.setAttribute("aria-expanded", open ? "true" : "false");
+        el.btnToggleIp.textContent = open ? "Ocultar configuración de IP" : "Mostrar configuración de IP";
+      });
+
+      el.baseUrl.addEventListener("change", function () {
+        saveBase();
+        fetchState();
+      });
+
+      el.baseUrl.addEventListener("keydown", function (ev) {
+        if (ev.key === "Enter") {
+          el.baseUrl.blur();
+          saveBase();
+          fetchState();
+        }
+      });
+
+      loadBase();
+      syncControlsFromState();
+      fetchState();
+      startPoll();
+
+      window.getRgbLampState = getStatePayload;
+    })();
+  </script>
+</body>
+</html>
