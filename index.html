@@ -613,7 +613,7 @@
         applyingRemote = true;
         try {
           if (typeof data.on === "boolean") state.on = data.on;
-          if (typeof data.effect === "number" && data.effect >= 1 && data.effect <= 6) {
+          if (typeof data.effect === "number" && data.effect >= 1 && data.effect <= 15) {    /** NUMERO DE EFECTOS HAST */
             state.effect = data.effect;
           }
           if (typeof data.brightness === "number") state.brightness = clamp(data.brightness, 0, 100);
