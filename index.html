@@ -613,7 +613,7 @@
         applyingRemote = true;
         try {
           if (typeof data.on === "boolean") state.on = data.on;
-          if (typeof data.effect === "number" && data.effect >= 1 && data.effect <= 15) {    /** NUMERO DE EFECTOS HAST */
+          if (typeof data.effect === "number" && data.effect >= 1 && data.effect <= 15) {    /** NUMERO DE EFECTOS HAST */  /** URL por defecto (barra final opcional; se normaliza al llamar a la API). */
             state.effect = data.effect;
           }
           if (typeof data.brightness === "number") state.brightness = clamp(data.brightness, 0, 100);
@@ -797,13 +797,13 @@
       });
 
       el.btnEffectLess.addEventListener("click", function () {
-        state.effect = state.effect <= 1 ? 6 : state.effect - 1;
+        state.effect = state.effect <= 1 ? 15 : state.effect - 1;      /** URL por defecto (barra final opcional; se normaliza al llamar a la API). */
         syncControlsFromState();
         notifyBackend();
       });
 
       el.btnEffectMore.addEventListener("click", function () {
-        state.effect = state.effect >= 6 ? 1 : state.effect + 1;
+        state.effect = state.effect >= 15 ? 1 : state.effect + 1;      /** URL por defecto (barra final opcional; se normaliza al llamar a la API). */
         syncControlsFromState();
         notifyBackend();
       });
