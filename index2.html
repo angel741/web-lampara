@@ -1,0 +1,18 @@
+<html>
+  <head>
+    <title>Mini App Simple</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  </head>
+  <body>
+    <script>
+      const tg = window.Telegram.WebApp;
+      tg.ready();
+      tg.expand(); // Expandir a pantalla completa
+
+      function mostrarMensaje() {
+        tg.showAlert('¡Hola desde tu Mini App!');
+      }
+    </script>
+    <button onclick="mostrarMensaje()">Enviar Mensaje</button>
+  </body>
+</html>
